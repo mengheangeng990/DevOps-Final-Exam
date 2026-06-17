@@ -103,7 +103,15 @@ jobs:
             echo "TO_EMAIL=srengty@gmail.com" >> $GITHUB_ENV
           fi
 
+      - name: Validate SMTP secrets
+        run: |
+          if [ -z "${{ secrets.SMTP_SERVER }}" ] || [ -z "${{ secrets.SMTP_PORT }}" ] || [ -z "${{ secrets.SMTP_USERNAME }}" ] || [ -z "${{ secrets.SMTP_PASSWORD }}" ]; then
+            echo "WARNING: SMTP secrets are missing. Skipping failure email notification."
+            exit 0
+          fi
+
       - name: Send build failure notification
+        if: ${{ secrets.SMTP_SERVER != '' && secrets.SMTP_PORT != '' && secrets.SMTP_USERNAME != '' && secrets.SMTP_PASSWORD != '' }}
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_SERVER }}
