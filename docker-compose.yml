@@ -22,7 +22,7 @@ services:
     image: mysql:8.0
     container_name: idcard_mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: Hello@123
       MYSQL_DATABASE: B-ENG_Mengheang-db
@@ -33,6 +33,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: idcard_phpmyadmin
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+      # Optionally use root or a managed user
+      PMA_USER: root
+      PMA_PASSWORD: Hello@123
+    ports:
+      - "8081:80"
     restart: unless-stopped
 
 volumes:

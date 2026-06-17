@@ -24,6 +24,14 @@ mvn spring-boot:run
 
 4. Open the app at `http://localhost:8080/profiles`.
 
+5. Open phpMyAdmin at `http://localhost:8081`.
+
+## Remote access
+
+- To access phpMyAdmin from a remote PC, use `http://<host-ip>:8081`.
+- Ensure the Docker host firewall allows port `8081` and that your network allows incoming connections to that host.
+- If using Windows, also allow Docker Desktop access for the port in Windows Firewall.
+
 ## Notes
 
 - The app uses `spring.jpa.hibernate.ddl-auto=update` for schema creation.
