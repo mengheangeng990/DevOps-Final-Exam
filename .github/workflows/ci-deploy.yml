@@ -62,21 +62,25 @@ jobs:
           fi
 
       - name: Install Ansible
+        if: ${{ secrets.SSH_PRIVATE_KEY != '' && secrets.ANSIBLE_HOST != '' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y ansible
 
       - name: Configure SSH for Ansible
+        if: ${{ secrets.SSH_PRIVATE_KEY != '' && secrets.ANSIBLE_HOST != '' }}
         uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Add remote host to known_hosts
+        if: ${{ secrets.SSH_PRIVATE_KEY != '' && secrets.ANSIBLE_HOST != '' }}
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.ANSIBLE_HOST }} >> ~/.ssh/known_hosts
 
       - name: Run Ansible playbook
+        if: ${{ secrets.SSH_PRIVATE_KEY != '' && secrets.ANSIBLE_HOST != '' }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: 'False'
         run: |
