@@ -53,6 +53,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Validate deploy secrets
+        run: |
+          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
+            echo "ERROR: SSH_PRIVATE_KEY secret is missing. Please add it to repository secrets." >&2
+            exit 1
+          fi
+          if [ -z "${{ secrets.ANSIBLE_HOST }}" ]; then
+            echo "ERROR: ANSIBLE_HOST secret is missing. Please add it to repository secrets." >&2
+            exit 1
+          fi
+
       - name: Install Ansible
         run: |
           sudo apt-get update
