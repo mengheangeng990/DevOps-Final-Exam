@@ -35,27 +35,40 @@ jobs:
     name: Deploy via Ansible
     needs: build-test
     runs-on: ubuntu-latest
-    if: ${{ needs.build-test.result == 'success' && secrets.SSH_PRIVATE_KEY != '' && secrets.ANSIBLE_HOST != '' }}
+    if: ${{ needs.build-test.result == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Validate deploy secrets
+        run: |
+          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ] || [ -z "${{ secrets.ANSIBLE_HOST }}" ]; then
+            echo "DEPLOY_ENABLED=false" >> $GITHUB_ENV
+            echo "WARNING: Deploy secrets are missing. Skipping Ansible deployment."
+            exit 0
+          fi
+          echo "DEPLOY_ENABLED=true" >> $GITHUB_ENV
+
       - name: Install Ansible
+        if: env.DEPLOY_ENABLED == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y ansible
 
       - name: Configure SSH for Ansible
+        if: env.DEPLOY_ENABLED == 'true'
         uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Add remote host to known_hosts
+        if: env.DEPLOY_ENABLED == 'true'
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.ANSIBLE_HOST }} >> ~/.ssh/known_hosts
 
       - name: Run Ansible playbook
+        if: env.DEPLOY_ENABLED == 'true'
         env:
           ANSIBLE_HOST_KEY_CHECKING: 'False'
         run: ansible-playbook -i inventory ansible-playbook.yml
@@ -80,12 +93,14 @@ jobs:
       - name: Validate SMTP secrets
         run: |
           if [ -z "${{ secrets.SMTP_SERVER }}" ] || [ -z "${{ secrets.SMTP_PORT }}" ] || [ -z "${{ secrets.SMTP_USERNAME }}" ] || [ -z "${{ secrets.SMTP_PASSWORD }}" ]; then
+            echo "SEND_EMAIL=false" >> $GITHUB_ENV
             echo "WARNING: SMTP secrets are missing. Skipping failure email notification."
             exit 0
           fi
+          echo "SEND_EMAIL=true" >> $GITHUB_ENV
 
       - name: Send build failure notification
-        if: ${{ secrets.SMTP_SERVER != '' && secrets.SMTP_PORT != '' && secrets.SMTP_USERNAME != '' && secrets.SMTP_PASSWORD != '' }}
+        if: env.SEND_EMAIL == 'true'
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_SERVER }}
