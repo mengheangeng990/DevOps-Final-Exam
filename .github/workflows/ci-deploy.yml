@@ -38,11 +38,8 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      - name: Run tests with SQLite DB
-        run: |
-          mvn test \
-            -Dspring.datasource.url=jdbc:sqlite:/tmp/test-db.sqlite \
-            -Dspring.jpa.hibernate.ddl-auto=create-drop
+      - name: Run tests
+        run: mvn test
 
   deploy:
     name: Deploy via Ansible
