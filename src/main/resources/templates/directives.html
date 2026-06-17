@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${title}">ID Card Manager</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+<header class="app-header" th:fragment="header()">
+    <div class="brand">ID Card Manager</div>
+    <nav class="nav-links">
+        <a href="/profiles">Profiles</a>
+        <a href="/templates">Templates</a>
+    </nav>
+</header>
+<footer class="app-footer" th:fragment="footer()">
+    <p>Built for ID Card management with Spring Boot + MySQL</p>
+</footer>
+</body>
+</html>

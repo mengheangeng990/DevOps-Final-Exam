@@ -1,0 +1,90 @@
+- name: Deploy and test Spring Boot app on web server
+  hosts: web
+  become: true
+  vars:
+    app_dir: /opt/idcard-manager
+    git_repo: https://github.com/mengheangeng990/DevOps-Final-Exam.git
+    prod_db_host: localhost
+    prod_db_user: root
+    prod_db_password: Hello@123
+    prod_db_name: B-ENG_Mengheang-db
+    backup_dir: /opt/idcard-manager/backups
+    sqlite_test_db: jdbc:sqlite:/tmp/test-db.sqlite
+    test_profile: test
+  tasks:
+    - name: Ensure application directory exists
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        recurse: yes
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Clone or update the repository
+      git:
+        repo: "{{ git_repo }}"
+        dest: "{{ app_dir }}"
+        version: main
+        force: yes
+      register: git_result
+
+    - name: Ensure no local changes remain before pull
+      shell: |
+        cd {{ app_dir }} && git status --short --untracked-files=no
+      register: git_status
+      changed_when: false
+
+    - name: Fail if local changes exist
+      fail:
+        msg: "Local changes exist in the repository; please clean or stash them before running the playbook."
+      when: git_status.stdout != ''
+
+    - name: Pull latest changes
+      git:
+        repo: "{{ git_repo }}"
+        dest: "{{ app_dir }}"
+        version: main
+        force: yes
+      when: git_status.stdout == ''
+
+    - name: Build the application with Maven
+      shell: |
+        cd {{ app_dir }} && mvn clean package -DskipTests
+      args:
+        chdir: "{{ app_dir }}"
+      register: build_result
+
+    - name: Run tests using SQLite test DB
+      shell: |
+        cd {{ app_dir }} && mvn test -Dspring.datasource.url={{ sqlite_test_db }} -Dspring.jpa.hibernate.ddl-auto=create-drop
+      args:
+        chdir: "{{ app_dir }}"
+      register: test_result
+
+    - name: Ensure backup directory exists
+      file:
+        path: "{{ backup_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Backup MySQL production database
+      shell: |
+        mysqldump -h 127.0.0.1 -P 3306 -u{{ prod_db_user }} -p{{ prod_db_password }} {{ prod_db_name }} > {{ backup_dir }}/{{ prod_db_name }}-backup.sql
+      register: backup_result
+
+    - name: Show git result
+      debug:
+        var: git_result
+
+    - name: Show build result
+      debug:
+        var: build_result.stdout
+
+    - name: Show test result
+      debug:
+        var: test_result.stdout
+
+    - name: Show backup result
+      debug:
+        var: backup_result.stdout
