@@ -3,14 +3,12 @@ name: CI Build and Deploy
 on:
   push:
     branches:
-      - '**'
+      - '*'
 
 jobs:
   build-test:
     name: Build and Test
     runs-on: ubuntu-latest
-    env:
-      JAVA_HOME: /usr/lib/jvm/java-17-openjdk
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,66 +20,45 @@ jobs:
           java-version: '17'
           cache: maven
 
-      - name: Cache Maven packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
       - name: Display Java and Maven versions
         run: |
           java -version
           mvn -v
 
       - name: Build with Maven
-        run: mvn clean package -DskipTests
+        run: mvn -B clean package -DskipTests
 
       - name: Run tests
-        run: mvn test
+        run: mvn -B test
 
   deploy:
     name: Deploy via Ansible
     needs: build-test
     runs-on: ubuntu-latest
-    if: ${{ needs.build-test.result == 'success' }}
+    if: ${{ needs.build-test.result == 'success' && secrets.SSH_PRIVATE_KEY != '' && secrets.ANSIBLE_HOST != '' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate deploy secrets
-        run: |
-          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ] || [ -z "${{ secrets.ANSIBLE_HOST }}" ]; then
-            echo "WARNING: Deploy secrets are missing. Skipping Ansible deployment."
-            echo "Please add SSH_PRIVATE_KEY and ANSIBLE_HOST to repository secrets."
-            exit 0
-          fi
-
       - name: Install Ansible
-        if: ${{ secrets.SSH_PRIVATE_KEY != '' && secrets.ANSIBLE_HOST != '' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y ansible
 
       - name: Configure SSH for Ansible
-        if: ${{ secrets.SSH_PRIVATE_KEY != '' && secrets.ANSIBLE_HOST != '' }}
         uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Add remote host to known_hosts
-        if: ${{ secrets.SSH_PRIVATE_KEY != '' && secrets.ANSIBLE_HOST != '' }}
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.ANSIBLE_HOST }} >> ~/.ssh/known_hosts
 
       - name: Run Ansible playbook
-        if: ${{ secrets.SSH_PRIVATE_KEY != '' && secrets.ANSIBLE_HOST != '' }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: 'False'
-        run: |
-          ansible-playbook -i inventory ansible-playbook.yml
+        run: ansible-playbook -i inventory ansible-playbook.yml
 
   failure-email:
     name: Send Failure Email
