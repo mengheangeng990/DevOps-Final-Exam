@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Profile Form</title>
+</head>
+<body>
+<h1 th:text="${profile.id == null} ? 'Create Profile' : 'Edit Profile'"></h1>
+<form th:action="@{/profiles}" th:object="${profile}" method="post" enctype="multipart/form-data">
+    <div>
+        <label>Full Name</label>
+        <input type="text" th:field="*{fullName}" />
+    </div>
+    <div>
+        <label>Type</label>
+        <select th:field="*{type}">
+            <option value="STUDENT">Student</option>
+            <option value="EMPLOYEE">Employee</option>
+            <option value="USER">User</option>
+        </select>
+    </div>
+    <div>
+        <label>Department</label>
+        <input type="text" th:field="*{department}" />
+    </div>
+    <div>
+        <label>Title</label>
+        <input type="text" th:field="*{title}" />
+    </div>
+    <div>
+        <label>Email</label>
+        <input type="email" th:field="*{email}" />
+    </div>
+    <div>
+        <label>Phone</label>
+        <input type="text" th:field="*{phone}" />
+    </div>
+    <div>
+        <label>Template</label>
+        <select th:field="*{template}">
+            <option th:each="template : ${templates}" th:value="${template}" th:text="${template.name}"></option>
+        </select>
+    </div>
+    <button type="submit">Save</button>
+</form>
+<form th:action="@{/profiles/upload/{id}(id=${profile.id})}" method="post" enctype="multipart/form-data" th:if="${profile.id != null}">
+    <div>
+        <label>Upload Photo</label>
+        <input type="file" name="photo" accept="image/jpeg,image/png" />
+    </div>
+    <button type="submit">Upload</button>
+</form>
+</body>
+</html>

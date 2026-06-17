@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Template Form</title>
+</head>
+<body>
+<h1 th:text="${template.id == null} ? 'Create Template' : 'Edit Template'"></h1>
+<form th:action="@{/templates}" th:object="${template}" method="post">
+    <div>
+        <label>Name</label>
+        <input type="text" th:field="*{name}" />
+    </div>
+    <div>
+        <label>Code</label>
+        <input type="text" th:field="*{code}" />
+    </div>
+    <div>
+        <label>Organization Name</label>
+        <input type="text" th:field="*{organizationName}" />
+    </div>
+    <div>
+        <label>Layout</label>
+        <input type="text" th:field="*{layout}" />
+    </div>
+    <div>
+        <label>Primary Color</label>
+        <input type="text" th:field="*{primaryColor}" />
+    </div>
+    <div>
+        <label>Secondary Color</label>
+        <input type="text" th:field="*{secondaryColor}" />
+    </div>
+    <div>
+        <label>Text Color</label>
+        <input type="text" th:field="*{textColor}" />
+    </div>
+    <div>
+        <label>Tagline</label>
+        <input type="text" th:field="*{tagline}" />
+    </div>
+    <button type="submit">Save</button>
+</form>
+</body>
+</html>

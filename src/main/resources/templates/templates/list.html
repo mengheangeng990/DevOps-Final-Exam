@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Template List</title>
+</head>
+<body>
+<h1>Templates</h1>
+<a href="/templates/create">Create Template</a>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Code</th>
+        <th>Layout</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="template : ${templates}">
+        <td th:text="${template.id}"></td>
+        <td th:text="${template.name}"></td>
+        <td th:text="${template.code}"></td>
+        <td th:text="${template.layout}"></td>
+        <td>
+            <a th:href="@{/templates/edit/{id}(id=${template.id})}">Edit</a>
+            <a th:href="@{/templates/delete/{id}(id=${template.id})}">Delete</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

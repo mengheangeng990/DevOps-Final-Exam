@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Profiles</title>
+</head>
+<body>
+<h1>Profiles</h1>
+<a href="/profiles/create">Create Profile</a>
+<form action="/profiles/search" method="post">
+    <input type="text" name="query" placeholder="Search by name" />
+    <button type="submit">Search</button>
+</form>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Registration</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="profile : ${profiles}">
+        <td th:text="${profile.id}"></td>
+        <td th:text="${profile.fullName}"></td>
+        <td th:text="${profile.type}"></td>
+        <td th:text="${profile.registrationNumber}"></td>
+        <td>
+            <a th:href="@{/profiles/edit/{id}(id=${profile.id})}">Edit</a>
+            <a th:href="@{/profiles/preview/{id}(id=${profile.id})}">Preview</a>
+            <a th:href="@{/profiles/delete/{id}(id=${profile.id})}">Delete</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

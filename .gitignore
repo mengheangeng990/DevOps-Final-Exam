@@ -1,0 +1,22 @@
+target/
+*.log
+*.tmp
+*.class
+*.jar
+*.war
+*.iml
+.idea/
+.vscode/
+.DS_Store
+/photos/
+# Maven
+.mvn/
+log/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# IntelliJ
+out/
